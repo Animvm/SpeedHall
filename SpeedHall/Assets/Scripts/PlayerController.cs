@@ -96,6 +96,15 @@ public class PlayerController : MonoBehaviour
     
     bool EsPosicionValida(Vector2 posicion)
     {
+         // Verifica si hay algún obstáculo en esa posición
+        Collider2D obstaculo = Physics2D.OverlapCircle(posicion, 0.1f);
+        
+        // Si encuentra un collider que no sea el del jugador, la posición no es válida
+        if (obstaculo != null && obstaculo.gameObject != gameObject)
+        {
+            return false;
+        }
+
         return true;
     }
     
