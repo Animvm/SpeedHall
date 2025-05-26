@@ -10,7 +10,7 @@ public class LevelManager : MonoBehaviour
     public Transform puntoMeta; // Donde debe llegar 
     
     [Header("UI del Juego")]
-    public Text textoTiempo; // Para mostrar el tiempo restante
+    public TextMeshProUGUI textoTiempo; // Para mostrar el tiempo restante
     public GameObject panelVictoria; // Panel que aparece al ganar
     public GameObject panelDerrota; // Panel que aparece al perder
     
