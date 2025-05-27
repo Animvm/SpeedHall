@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro; 
 
 public class LevelManager : MonoBehaviour
 {
@@ -10,9 +9,8 @@ public class LevelManager : MonoBehaviour
     public Transform puntoMeta; // Donde debe llegar 
     
     [Header("UI del Juego")]
-    public TextMeshProUGUI textoTiempo; // Para mostrar el tiempo restante
-    public GameObject panelVictoria; // Panel que aparece al ganar
-    public GameObject panelDerrota; // Panel que aparece al perder
+    public Text textoTiempo; // Muestra el tiempo restante
+    public ResultadoNivel resultadoNivel; // Referencia al script del pop-up
     
     private float tiempoRestante;
     private bool juegoTerminado = false;
@@ -23,31 +21,27 @@ public class LevelManager : MonoBehaviour
         // Inicializa el tiempo
         tiempoRestante = tiempoLimite;
         
-        // Encontrar el jugador
+        // Encuentra al jugador
         jugador = FindObjectOfType<PlayerController>();
         
-        // Posiciona al jugador en el punto de inicio
+        // Posiciona al jugador en el inicio
         if (puntoInicio != null && jugador != null)
         {
             jugador.transform.position = puntoInicio.position;
         }
-        
-        // Ocultar paneles al inicio
-        if (panelVictoria != null) panelVictoria.SetActive(false);
-        if (panelDerrota != null) panelDerrota.SetActive(false);
     }
     
     void Update()
     {
         if (!juegoTerminado)
         {
-            // Restar tiempo
+            // Va restando tiempo
             tiempoRestante -= Time.deltaTime;
             
-            // Actualiza UI del tiempo
+            // Actualiza texto del tiempo
             ActualizarTextoTiempo();
             
-            // Verificar si se acabó el tiempo
+            // Verifica si se acabó el tiempo
             if (tiempoRestante <= 0)
             {
                 GameOver();
@@ -83,32 +77,32 @@ public class LevelManager : MonoBehaviour
     void Victoria()
     {
         juegoTerminado = true;
-        Debug.Log("Ganaste!!!!");
+        //Debug.Log("Ganaste!!");
         
-        if (panelVictoria != null)
+        // Calcula estrellas y mostra resultado (estrellas dependerán del tiempo restante)
+        int estrellas = CalcularEstrellas();
+        
+        if (resultadoNivel != null)
         {
-            panelVictoria.SetActive(true);
+            resultadoNivel.MostrarVictoria(estrellas, tiempoRestante, tiempoLimite);
         }
-        
-        // Calcula las estrellas basadas en tiempo restante
-        CalcularEstrellas();
     }
     
     void GameOver()
     {
         juegoTerminado = true;
         tiempoRestante = 0;
-        Debug.Log("Se acabó el tiempo :c");
+        //Debug.Log("Se acabó el tiempo");
         
-        if (panelDerrota != null)
+        if (resultadoNivel != null)
         {
-            panelDerrota.SetActive(true);
+            resultadoNivel.MostrarDerrota(tiempoLimite, tiempoLimite);
         }
     }
     
-    void CalcularEstrellas()
+    int CalcularEstrellas()
     {
-        int estrellas = 1; // Al menos 1 estrella por completar
+        int estrellas = 1; // Al menos 1 estrella por completar nivel
         
         // 2 estrellas si queda más del 30% del tiempo
         if (tiempoRestante > tiempoLimite * 0.3f)
@@ -122,7 +116,8 @@ public class LevelManager : MonoBehaviour
             estrellas = 3;
         }
         
-        Debug.Log("Estrellas obtenidas: " + estrellas);
+        //Debug.Log("Estrellas obtenidas: " + estrellas);
+        return estrellas;
     }
     
     // Función para reiniciar el nivel
