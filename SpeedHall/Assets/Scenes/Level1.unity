@@ -219,7 +219,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6663a0b2f3f0df403a4331ca0ceaf119, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tiempoMovimiento: 0.3
+  tiempoMovimiento: 0.1
   tamanoCelda: 1
 --- !u!1 &519420028
 GameObject:
@@ -730,8 +730,7 @@ MonoBehaviour:
   puntoInicio: {fileID: 1548054733}
   puntoMeta: {fileID: 2097175194}
   textoTiempo: {fileID: 573904202}
-  panelVictoria: {fileID: 0}
-  panelDerrota: {fileID: 0}
+  resultadoNivel: {fileID: 0}
 --- !u!1 &1548054731
 GameObject:
   m_ObjectHideFlags: 0
