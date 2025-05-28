@@ -27,7 +27,18 @@ public class LevelManager : MonoBehaviour
         // Posiciona al jugador en el inicio
         if (puntoInicio != null && jugador != null)
         {
-            jugador.transform.position = puntoInicio.position;
+            // Posiciona al jugador en el grid más cercano al punto de inicio
+            Vector3 posicionInicio = puntoInicio.position;
+            Vector3 posicionGrid = new Vector3(
+                Mathf.Round(posicionInicio.x),
+                Mathf.Round(posicionInicio.y),
+                0
+            );
+            
+            jugador.transform.position = posicionGrid;
+            
+            // Llama a una función para reinicializar el PlayerController
+            jugador.InicializarPosicion(posicionGrid);
         }
     }
     
