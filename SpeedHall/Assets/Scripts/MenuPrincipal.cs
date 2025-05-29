@@ -11,6 +11,7 @@ public class MenuPrincipal : MonoBehaviour
     
     [Header("Botones del Menú Principal")]
     public Button botonJugar;
+    public Button botonNiveles; // Nuevo botón
     public Button botonPersonajes;
     public Button botonOpciones;
     public Button botonSalir;
@@ -33,6 +34,9 @@ public class MenuPrincipal : MonoBehaviour
         // Configurar botones del menú principal
         if (botonJugar != null)
             botonJugar.onClick.AddListener(IniciarJuego);
+        
+        if (botonNiveles != null)
+            botonNiveles.onClick.AddListener(IrSeleccionNiveles);
         
         if (botonPersonajes != null)
             botonPersonajes.onClick.AddListener(MostrarPanelPersonajes);
@@ -86,6 +90,11 @@ public class MenuPrincipal : MonoBehaviour
         
         // Cargar la escena del juego
         SceneManager.LoadScene("SampleScene");
+    }
+    
+    void IrSeleccionNiveles()
+    {
+        SceneManager.LoadScene("SeleccionNiveles");
     }
     
     void SalirJuego()
