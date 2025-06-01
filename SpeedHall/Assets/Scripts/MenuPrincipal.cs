@@ -11,7 +11,7 @@ public class MenuPrincipal : MonoBehaviour
     
     [Header("Botones del Menú Principal")]
     public Button botonJugar;
-    public Button botonNiveles; // Nuevo botón
+    public Button botonNiveles;
     public Button botonPersonajes;
     public Button botonOpciones;
     public Button botonSalir;
@@ -20,18 +20,16 @@ public class MenuPrincipal : MonoBehaviour
     public Button botonVolverPersonajes;
     public Button botonVolverOpciones;
     
-    [Header("Opciones de Audio")]
-    public Slider sliderVolumenMusica;
-    public Slider sliderVolumenEfectos;
-    
-    private int personajeSeleccionado = 0; // Índice del personaje seleccionado
+    [Header("Botones de Debug (Testing)")]
+    public Button botonResetearProgreso;
+    public Button botonDesbloquearNivel2;
     
     void Start()
     {
-        // Mostrar solo el panel principal al inicio
+        // Muestra solo el panel principal al inicio
         MostrarPanelPrincipal();
         
-        // Configurar botones del menú principal
+        // Configura botones del menú principal
         if (botonJugar != null)
             botonJugar.onClick.AddListener(IniciarJuego);
         
@@ -47,18 +45,21 @@ public class MenuPrincipal : MonoBehaviour
         if (botonSalir != null)
             botonSalir.onClick.AddListener(SalirJuego);
         
-        // Configura botones 
+        // Configura botones de navegación
         if (botonVolverPersonajes != null)
             botonVolverPersonajes.onClick.AddListener(MostrarPanelPrincipal);
         
         if (botonVolverOpciones != null)
             botonVolverOpciones.onClick.AddListener(MostrarPanelPrincipal);
         
-        // Configurar audio
-        ConfigurarSlidersAudio();
+        // Configura botones de debug (solo en editor)
+        #if UNITY_EDITOR
+        if (botonResetearProgreso != null)
+            botonResetearProgreso.onClick.AddListener(ResetearProgreso);
         
-        // Cargar configuraciones guardadas
-        CargarConfiguraciones();
+        if (botonDesbloquearNivel2 != null)
+            botonDesbloquearNivel2.onClick.AddListener(DesbloquearNivel2);
+        #endif
     }
     
     void MostrarPanelPrincipal()
@@ -84,12 +85,25 @@ public class MenuPrincipal : MonoBehaviour
     
     void IniciarJuego()
     {
-        // Guarda el personaje seleccionado para usar en el juego
-        PlayerPrefs.SetInt("PersonajeSeleccionado", personajeSeleccionado);
+        // Obtiene el nivel máximo desbloqueado
+        int nivelMaximo = PlayerPrefs.GetInt("NivelMaximo", 1);
+        
+        // Limita al número máximo de niveles que realmente existen
+        int totalNivelesExistentes = 2;
+        if (nivelMaximo > totalNivelesExistentes)
+        {
+            nivelMaximo = totalNivelesExistentes;
+        }
+        
+        // Va al nivel más alto disponible
+        string nombreEscena = "Level" + nivelMaximo;
+        
+        // Guarda el nivel actual
+        PlayerPrefs.SetInt("NivelActual", nivelMaximo);
         PlayerPrefs.Save();
         
-        // Cargar la escena del juego
-        SceneManager.LoadScene("SampleScene");
+        // Carga la escena del nivel
+        SceneManager.LoadScene(nombreEscena);
     }
     
     void IrSeleccionNiveles()
@@ -98,61 +112,33 @@ public class MenuPrincipal : MonoBehaviour
     }
     
     void SalirJuego()
-    {
-        Debug.Log("Saliendo del juego...");
-        
+    {        
+        // En el editor de Unity
         #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
         #else
+            // En la aplicación compilada
             Application.Quit();
         #endif
     }
     
-    void ConfigurarSlidersAudio()
+    // Funciones de debug para testing
+    void ResetearProgreso()
     {
-        if (sliderVolumenMusica != null)
-        {
-            sliderVolumenMusica.onValueChanged.AddListener(CambiarVolumenMusica);
-        }
-        
-        if (sliderVolumenEfectos != null)
-        {
-            sliderVolumenEfectos.onValueChanged.AddListener(CambiarVolumenEfectos);
-        }
-    }
-    
-    void CambiarVolumenMusica(float volumen)
-    {
-        // Guardar el volumen de música
-        PlayerPrefs.SetFloat("VolumenMusica", volumen);
+        // Limpia todos los PlayerPrefs del juego
+        PlayerPrefs.DeleteKey("NivelMaximo");
+        PlayerPrefs.DeleteKey("NivelActual");
+        PlayerPrefs.DeleteKey("MejorTiempo_Level1");
+        PlayerPrefs.DeleteKey("MejorTiempo_Level2");
         PlayerPrefs.Save();
         
-        Debug.Log("Volumen música: " + volumen);
+        // Recarga la escena para actualizar la interfaz
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
     
-    void CambiarVolumenEfectos(float volumen)
+    void DesbloquearNivel2()
     {
-        // Guardar el volumen de efectos
-        PlayerPrefs.SetFloat("VolumenEfectos", volumen);
+        PlayerPrefs.SetInt("NivelMaximo", 2);
         PlayerPrefs.Save();
-        
-        Debug.Log("Volumen efectos: " + volumen);
-    }
-    
-    void CargarConfiguraciones()
-    {
-        // Cargar personaje seleccionado
-        personajeSeleccionado = PlayerPrefs.GetInt("PersonajeSeleccionado", 0);
-        
-        // Cargar volúmenes
-        if (sliderVolumenMusica != null)
-        {
-            sliderVolumenMusica.value = PlayerPrefs.GetFloat("VolumenMusica", 0.8f);
-        }
-        
-        if (sliderVolumenEfectos != null)
-        {
-            sliderVolumenEfectos.value = PlayerPrefs.GetFloat("VolumenEfectos", 0.8f);
-        }
     }
 }
