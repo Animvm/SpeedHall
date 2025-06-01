@@ -4,14 +4,15 @@ using UnityEngine.UI;
 public class LevelManager : MonoBehaviour
 {
     [Header("Configuración del Nivel")]
-    public float tiempoLimite = 30f; // Tiempo límite 
-    public Transform puntoInicio; // Donde empieza el jugador
-    public Transform puntoMeta; // Donde debe llegar 
+    public float tiempoLimite = 30f;
+    public Transform puntoInicio;
+    public Transform puntoMeta;
     
     [Header("UI del Juego")]
-    public Text textoTiempo; // Muestra el tiempo restante
-    public ResultadoNivel resultadoNivel; // Referencia al script del pop-up
+    public Text textoTiempo;
+    public ResultadoNivel resultadoNivel;
     
+    // Variables privadas
     private float tiempoRestante;
     private bool juegoTerminado = false;
     private PlayerController jugador;
@@ -20,6 +21,20 @@ public class LevelManager : MonoBehaviour
     {
         // Inicializa el tiempo
         tiempoRestante = tiempoLimite;
+        
+        // Detecta y guarda qué nivel es este basado en el nombre de la escena
+        string nombreEscena = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+        
+        // Extrae el número del nivel del nombre de la escena
+        if (nombreEscena.Contains("Level"))
+        {
+            string numeroStr = nombreEscena.Replace("Level", "");
+            if (int.TryParse(numeroStr, out int numeroNivel))
+            {
+                PlayerPrefs.SetInt("NivelActual", numeroNivel);
+                PlayerPrefs.Save();
+            }
+        }
         
         // Encuentra al jugador
         jugador = FindObjectOfType<PlayerController>();
@@ -78,7 +93,7 @@ public class LevelManager : MonoBehaviour
         {
             // Verifica si el jugador está cerca de la meta
             float distancia = Vector2.Distance(jugador.transform.position, puntoMeta.position);
-            if (distancia < 0.5f) // Si está muy cerca de la meta
+            if (distancia < 0.5f)
             {
                 Victoria();
             }
@@ -88,9 +103,8 @@ public class LevelManager : MonoBehaviour
     void Victoria()
     {
         juegoTerminado = true;
-        //Debug.Log("Ganaste!!");
         
-        // Calcula estrellas y mostra resultado (estrellas dependerán del tiempo restante)
+        // Calcula estrellas y muestra resultado
         int estrellas = CalcularEstrellas();
         
         if (resultadoNivel != null)
@@ -103,7 +117,6 @@ public class LevelManager : MonoBehaviour
     {
         juegoTerminado = true;
         tiempoRestante = 0;
-        //Debug.Log("Se acabó el tiempo");
         
         if (resultadoNivel != null)
         {
@@ -127,7 +140,6 @@ public class LevelManager : MonoBehaviour
             estrellas = 3;
         }
         
-        //Debug.Log("Estrellas obtenidas: " + estrellas);
         return estrellas;
     }
     
