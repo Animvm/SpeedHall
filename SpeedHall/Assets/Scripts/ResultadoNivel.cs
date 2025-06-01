@@ -5,29 +5,22 @@ using UnityEngine.SceneManagement;
 public class ResultadoNivel : MonoBehaviour
 {
     [Header("Elementos del Pop-up")]
-    public GameObject panelResultado; // El panel completo del pop-up
-    public Text textoTitulo; // "¡NIVEL COMPLETADO!" o "GAME OVER"
-    public Text textoTiempo; // Tiempo usado o restante
-    public Text textoRecord; // Mensaje de nuevo récord
-    public Image[] imagenesEstrellas; // Array de 3 imágenes de estrellas
-    public Sprite estrellaLlena; // Sprite de estrella dorada
-    public Sprite estrellaVacia; // Sprite de estrella gris
+    public GameObject panelResultado;
+    public Text textoTitulo;
+    public Text textoTiempo;
+    public Text textoRecord;
 
     [Header("Botones")]
     public Button botonSiguienteNivel;
     public Button botonReiniciarNivel;
     public Button botonMenuPrincipal;
 
-    [Header("Efectos Visuales")]
-    public GameObject efectoVictoria; // Efecto de victoria
-    public GameObject efectoDerrota; // Efectos para game over
-
-    private bool nivelCompletado = false;
-    private int estrellasObtenidas = 0;
-    private float tiempoUsado = 0f;
-    private float tiempoLimite = 0f;
+    [Header("Configuración de Niveles")]
+    public int totalNivelesDisponibles = 2;
     
-    // Variables para récords
+    // Variables privadas
+    private bool nivelCompletado = false;
+    private float tiempoUsado = 0f;
     private string nombreEscena;
     private float mejorTiempo = 0f;
     private bool esNuevoRecord = false;
@@ -65,42 +58,29 @@ public class ResultadoNivel : MonoBehaviour
     public void MostrarVictoria(int estrellas, float tiempoRestante, float tiempoTotal)
     {
         nivelCompletado = true;
-        estrellasObtenidas = estrellas;
         tiempoUsado = tiempoTotal - tiempoRestante;
-        tiempoLimite = tiempoTotal;
 
         // Verifica si es un nuevo récord
         VerificarRecord();
+        
+        // Desbloquea el siguiente nivel
+        SeleccionNiveles.DesbloquearSiguienteNivel();
 
         MostrarPanel();
         ConfigurarTextos();
         ConfigurarBotonesVictoria();
-
-        if (efectoVictoria != null)
-            efectoVictoria.SetActive(true);
-
-        if (efectoDerrota != null)
-            efectoDerrota.SetActive(false);
     }
 
     // Función para mostrar resultado de derrota
     public void MostrarDerrota(float tiempoUsado, float tiempoTotal)
     {
         nivelCompletado = false;
-        estrellasObtenidas = 0;
         this.tiempoUsado = tiempoUsado;
-        tiempoLimite = tiempoTotal;
         esNuevoRecord = false;
 
         MostrarPanel();
         ConfigurarTextos();
         ConfigurarBotonesDerrota();
-
-        if (efectoDerrota != null)
-            efectoDerrota.SetActive(true);
-
-        if (efectoVictoria != null)
-            efectoVictoria.SetActive(false);
     }
 
     void VerificarRecord()
@@ -114,7 +94,6 @@ public class ResultadoNivel : MonoBehaviour
             // Guarda el nuevo récord
             PlayerPrefs.SetFloat("MejorTiempo_" + nombreEscena, mejorTiempo);
             PlayerPrefs.Save();
-            
         }
         else
         {
@@ -127,14 +106,14 @@ public class ResultadoNivel : MonoBehaviour
         if (panelResultado != null)
         {
             panelResultado.SetActive(true);
-            // Pausar el juego
+            // Pausa el juego
             Time.timeScale = 0f;
         }
     }
 
     void ConfigurarTextos()
     {
-        // Configura el título
+        // Configura título - solo cambia el texto
         if (textoTitulo != null)
         {
             if (nivelCompletado)
@@ -147,7 +126,7 @@ public class ResultadoNivel : MonoBehaviour
             }
         }
 
-        // Configura el texto del tiempo 
+        // Configura texto de tiempo - solo el contenido
         if (textoTiempo != null)
         {
             if (nivelCompletado)
@@ -175,7 +154,11 @@ public class ResultadoNivel : MonoBehaviour
         {
             if (nivelCompletado && esNuevoRecord)
             {
-                textoRecord.text = "¡NUEVO RÉCORD!";
+                // Formatea el tiempo del nuevo récord
+                int segundos = Mathf.RoundToInt(tiempoUsado);
+                string tiempoTexto = (segundos == 1) ? "segundo" : "segundos";
+                
+                textoRecord.text = string.Format("¡NUEVO RÉCORD! {0} {1}", segundos, tiempoTexto);
                 textoRecord.gameObject.SetActive(true);
             }
             else if (nivelCompletado && mejorTiempo > 0)
@@ -203,9 +186,22 @@ public class ResultadoNivel : MonoBehaviour
 
     void ConfigurarBotonesVictoria()
     {
-        // En victoria, mostrar botón de siguiente nivel
+        // Obtiene el nivel actual
+        int nivelActual = PlayerPrefs.GetInt("NivelActual", 1);
+        
+        // Verifica si hay un siguiente nivel disponible
+        bool hayMasNiveles = nivelActual < totalNivelesDisponibles;
+        
+        // Configura botón de siguiente nivel
         if (botonSiguienteNivel != null)
-            botonSiguienteNivel.gameObject.SetActive(true);
+        {
+            botonSiguienteNivel.gameObject.SetActive(hayMasNiveles);
+            
+            if (hayMasNiveles)
+            {
+                botonSiguienteNivel.interactable = true;
+            }
+        }
 
         if (botonReiniciarNivel != null)
             botonReiniciarNivel.gameObject.SetActive(true);
@@ -216,7 +212,7 @@ public class ResultadoNivel : MonoBehaviour
 
     void ConfigurarBotonesDerrota()
     {
-        // En derrota, ocultar botón de siguiente nivel
+        // En derrota, oculta botón de siguiente nivel
         if (botonSiguienteNivel != null)
             botonSiguienteNivel.gameObject.SetActive(false);
 
@@ -231,9 +227,26 @@ public class ResultadoNivel : MonoBehaviour
     {
         Time.timeScale = 1f; // Reanuda el tiempo
         
-        // Por ahora reinicia el mismo nivel 
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        // Obtiene el nivel actual
+        int nivelActual = PlayerPrefs.GetInt("NivelActual", 1);
+        int siguienteNivel = nivelActual + 1;
         
+        // Verifica si existe el siguiente nivel
+        if (siguienteNivel <= totalNivelesDisponibles)
+        {
+            string siguienteEscena = "Level" + siguienteNivel;
+            
+            // Guarda el nuevo nivel actual
+            PlayerPrefs.SetInt("NivelActual", siguienteNivel);
+            PlayerPrefs.Save();
+            
+            SceneManager.LoadScene(siguienteEscena);
+        }
+        else
+        {
+            // No hay más niveles, vuelve al menú de selección
+            SceneManager.LoadScene("SeleccionNiveles");
+        }
     }
 
     void ReiniciarNivel()
