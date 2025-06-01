@@ -5,16 +5,15 @@ using UnityEngine.SceneManagement;
 public class SeleccionNiveles : MonoBehaviour
 {
     [Header("UI de Selección de Niveles")]
-    public Button botonVolver; // Botón para volver al menú principal
-    public Button[] botonesNiveles; // Array de botones de niveles
-    public Text[] textosEstrellas; // Array que muestran las estrellas obtenidas
-    public Text[] textosTiempos; // Textos que muestran los mejores tiempos
+    public Button botonVolver;
+    public Button[] botonesNiveles;
+    public Text[] textosTiempos;
     
     [Header("Configuración de Niveles")]
-    public string[] nombresEscenas; // Nombres de las escenas de cada nivel
-    public int[] tiemposLimite; // Tiempo límite de cada nivel
+    public string[] nombresEscenas;
     
-    private int nivelMaximoDesbloqueado = 1; // Cuántos niveles están desbloqueados
+    // Variables privadas
+    private int nivelMaximoDesbloqueado = 1;
     
     void Start()
     {
@@ -32,8 +31,6 @@ public class SeleccionNiveles : MonoBehaviour
     {
         // Carga el nivel máximo desbloqueado
         nivelMaximoDesbloqueado = PlayerPrefs.GetInt("NivelMaximo", 1);
-        
-        Debug.Log("Nivel máximo desbloqueado: " + nivelMaximoDesbloqueado);
     }
     
     void ConfigurarBotones()
@@ -82,7 +79,7 @@ public class SeleccionNiveles : MonoBehaviour
                 }
             }
             
-            // Actualiza información de estrellas y tiempos
+            // Actualiza información de tiempos
             ActualizarEstadisticasNivel(i, numeroNivel);
         }
     }
@@ -102,26 +99,7 @@ public class SeleccionNiveles : MonoBehaviour
         }
         
         // Carga estadísticas guardadas
-        int estrellasObtenidas = PlayerPrefs.GetInt("Estrellas_" + nombreEscena, 0);
         float mejorTiempo = PlayerPrefs.GetFloat("MejorTiempo_" + nombreEscena, 0f);
-        
-        // Actualiza texto de estrellas
-        if (indice < textosEstrellas.Length && textosEstrellas[indice] != null)
-        {
-            if (estrellasObtenidas > 0)
-            {
-                string textoEstrellas = "";
-                for (int j = 0; j < 3; j++)
-                {
-                    textoEstrellas += (j < estrellasObtenidas) ? "⭐" : "☆";
-                }
-                textosEstrellas[indice].text = textoEstrellas;
-            }
-            else
-            {
-                textosEstrellas[indice].text = "☆☆☆";
-            }
-        }
         
         // Actualiza texto de tiempo
         if (indice < textosTiempos.Length && textosTiempos[indice] != null)
@@ -149,11 +127,9 @@ public class SeleccionNiveles : MonoBehaviour
     
     void CargarNivel(int numeroNivel)
     {
-        Debug.Log("Cargando nivel: " + numeroNivel);
-        
         // Determina el nombre de la escena
         string nombreEscena = "";
-        if (numeroNivel - 1 < nombresEscenas.Length)
+        if (numeroNivel - 1 < nombresEscenas.Length && !string.IsNullOrEmpty(nombresEscenas[numeroNivel - 1]))
         {
             nombreEscena = nombresEscenas[numeroNivel - 1];
         }
@@ -176,28 +152,17 @@ public class SeleccionNiveles : MonoBehaviour
         SceneManager.LoadScene("MenuPrincipal");
     }
     
-    // Función pública para desbloquear el siguiente nivel 
+    // Función pública para desbloquear el siguiente nivel
     public static void DesbloquearSiguienteNivel()
     {
         int nivelActual = PlayerPrefs.GetInt("NivelActual", 1);
         int nivelMaximo = PlayerPrefs.GetInt("NivelMaximo", 1);
         
+        // Si el nivel actual completado es mayor o igual al máximo desbloqueado
         if (nivelActual >= nivelMaximo)
         {
-            PlayerPrefs.SetInt("NivelMaximo", nivelActual + 1);
-            PlayerPrefs.Save();
-            Debug.Log("Nivel " + (nivelActual + 1) + " desbloqueado!");
-        }
-    }
-    
-    // Función para guardar estadísticas del nivel
-    public static void GuardarEstadisticasNivel(string nombreEscena, int estrellas)
-    {
-        // Guarda las mejores estrellas obtenidas
-        int mejoresEstrellas = PlayerPrefs.GetInt("Estrellas_" + nombreEscena, 0);
-        if (estrellas > mejoresEstrellas)
-        {
-            PlayerPrefs.SetInt("Estrellas_" + nombreEscena, estrellas);
+            int nuevoMaximo = nivelActual + 1;
+            PlayerPrefs.SetInt("NivelMaximo", nuevoMaximo);
             PlayerPrefs.Save();
         }
     }
