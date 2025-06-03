@@ -8,6 +8,7 @@ public class SeleccionNiveles : MonoBehaviour
     public Button botonVolver;
     public Button[] botonesNiveles;
     public Text[] textosTiempos;
+    public Text[] textosEstrellas; // textos para mostrar estrellas
     
     [Header("Configuración de Niveles")]
     public string[] nombresEscenas;
@@ -99,7 +100,26 @@ public class SeleccionNiveles : MonoBehaviour
         }
         
         // Carga estadísticas guardadas
+        int estrellasObtenidas = PlayerPrefs.GetInt("Estrellas_" + nombreEscena, 0);
         float mejorTiempo = PlayerPrefs.GetFloat("MejorTiempo_" + nombreEscena, 0f);
+        
+        // Actualiza texto de estrellas
+        if (indice < textosEstrellas.Length && textosEstrellas[indice] != null)
+        {
+            if (estrellasObtenidas > 0)
+            {
+                string textoEstrellas = "";
+                for (int j = 0; j < 3; j++)
+                {
+                    textoEstrellas += (j < estrellasObtenidas) ? "⭐" : "☆";
+                }
+                textosEstrellas[indice].text = textoEstrellas;
+            }
+            else
+            {
+                textosEstrellas[indice].text = "☆☆☆";
+            }
+        }
         
         // Actualiza texto de tiempo
         if (indice < textosTiempos.Length && textosTiempos[indice] != null)
@@ -163,6 +183,18 @@ public class SeleccionNiveles : MonoBehaviour
         {
             int nuevoMaximo = nivelActual + 1;
             PlayerPrefs.SetInt("NivelMaximo", nuevoMaximo);
+            PlayerPrefs.Save();
+        }
+    }
+    
+    // Función para guardar estadísticas del nivel
+    public static void GuardarEstadisticasNivel(string nombreEscena, int estrellas)
+    {
+        // Guarda las mejores estrellas obtenidas
+        int mejoresEstrellas = PlayerPrefs.GetInt("Estrellas_" + nombreEscena, 0);
+        if (estrellas > mejoresEstrellas)
+        {
+            PlayerPrefs.SetInt("Estrellas_" + nombreEscena, estrellas);
             PlayerPrefs.Save();
         }
     }
