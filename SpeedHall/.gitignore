@@ -53,6 +53,7 @@ sysinfo.txt
 
 # Builds
 *.apk
+*.aab
 *.unitypackage
 
 # Crashlytics generated file
@@ -67,6 +68,57 @@ crashlytics-build.properties
 
 # TextMeshPro
 /[Aa]ssets/TextMesh*Pro/
+
+# Android Build Files
+android_gradle*
+ninja_*
+hash_key.txt
+build_file_index*
+cmake*
+CMakeCache*
+CMakeFiles/
+compile_commands*
+configure_fingerprint*
+metadata_gen*
+prefab_config*
+symbol_folder*
+cache-*/
+build.ninja
+cmake_install.cmake
+CMakeOutput.log
+CMakeCompileCommands.json
+rules.ninja
+TargetDirectories.txt
+CMakeCompileCommands.log
+
+# Unity Temp and Build directories (more specific)
+**/utmp/
+**/RelWithDebInfo/
+utmp/
+RelWithDebInfo/
+additional_project_files.txt
+cache-v2*
+codemodel-v2*
+directory-*.json
+index-*.json
+target-*.json
+
+# JSON cache files from builds
+*.json.cache
+*-cache/
+**/.cmake/
+
+# Gradle Build Files
+.gradle/
+gradle/
+gradlew*
+build/
+*.gradle
+local.properties
+
+# Android specific
+*.keystore
+*.jks
 
 # OS generated files
 .DS_Store
