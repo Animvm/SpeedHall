@@ -9,6 +9,9 @@ public class ResultadoNivel : MonoBehaviour
     public Text textoTitulo;
     public Text textoTiempo;
     public Text textoRecord;
+    public Image[] imagenesEstrellas; // Array de 3 imágenes de estrellas
+    public Sprite estrellaLlena; // Sprite de estrella dorada/llena
+    public Sprite estrellaVacia; // Sprite de estrella gris/vacía
 
     [Header("Botones")]
     public Button botonSiguienteNivel;
@@ -20,6 +23,7 @@ public class ResultadoNivel : MonoBehaviour
     
     // Variables privadas
     private bool nivelCompletado = false;
+    private int estrellasObtenidas = 0; 
     private float tiempoUsado = 0f;
     private string nombreEscena;
     private float mejorTiempo = 0f;
@@ -58,16 +62,21 @@ public class ResultadoNivel : MonoBehaviour
     public void MostrarVictoria(int estrellas, float tiempoRestante, float tiempoTotal)
     {
         nivelCompletado = true;
+        estrellasObtenidas = estrellas; 
         tiempoUsado = tiempoTotal - tiempoRestante;
 
         // Verifica si es un nuevo récord
         VerificarRecord();
+        
+        // Guarda las estrellas obtenidas
+        SeleccionNiveles.GuardarEstadisticasNivel(nombreEscena, estrellas);
         
         // Desbloquea el siguiente nivel
         SeleccionNiveles.DesbloquearSiguienteNivel();
 
         MostrarPanel();
         ConfigurarTextos();
+        MostrarEstrellas(); // llamada para mostrar estrellas
         ConfigurarBotonesVictoria();
     }
 
@@ -75,11 +84,13 @@ public class ResultadoNivel : MonoBehaviour
     public void MostrarDerrota(float tiempoUsado, float tiempoTotal)
     {
         nivelCompletado = false;
+        estrellasObtenidas = 0; // Sin estrellas en game over
         this.tiempoUsado = tiempoUsado;
         esNuevoRecord = false;
 
         MostrarPanel();
         ConfigurarTextos();
+        MostrarEstrellas(); // mostramos estrellas vacías en derrota
         ConfigurarBotonesDerrota();
     }
 
@@ -259,5 +270,29 @@ public class ResultadoNivel : MonoBehaviour
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene("MenuPrincipal");
+    }
+    
+    // Función que muestra las estrellas obtenidas
+    void MostrarEstrellas()
+    {
+        if (imagenesEstrellas == null) return;
+
+        for (int i = 0; i < imagenesEstrellas.Length; i++)
+        {
+            if (imagenesEstrellas[i] != null)
+            {
+                // estrella llena si se obtuvo, vacía si no
+                if (i < estrellasObtenidas)
+                {
+                    if (estrellaLlena != null)
+                        imagenesEstrellas[i].sprite = estrellaLlena;
+                }
+                else
+                {
+                    if (estrellaVacia != null)
+                        imagenesEstrellas[i].sprite = estrellaVacia;
+                }
+            }
+        }
     }
 }
